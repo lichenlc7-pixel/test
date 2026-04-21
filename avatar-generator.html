@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可爱头像生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .preview-area {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-container {
+            width: 280px;
+            height: 280px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #avatar-svg {
+            width: 250px;
+            height: 250px;
+        }
+
+        .controls-area {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: #333;
+            box-shadow: 0 0 0 3px white, 0 0 0 5px #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(17, 153, 142, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .avatar-container {
+                width: 220px;
+                height: 220px;
+            }
+
+            #avatar-svg {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 可爱头像生成器</h1>
+        <div class="main-content">
+            <div class="preview-area">
+                <div class="avatar-container">
+                    <svg id="avatar-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 背景 -->
+                        <circle cx="100" cy="100" r="95" fill="#FFE4E1"/>
+
+                        <!-- 脸型 -->
+                        <ellipse id="face" cx="100" cy="105" rx="70" ry="65" fill="#FFDAB9"/>
+
+                        <!-- 腮红 -->
+                        <ellipse id="blush-left" cx="60" cy="115" rx="12" ry="8" fill="#FFB6C1" opacity="0.6"/>
+                        <ellipse id="blush-right" cx="140" cy="115" rx="12" ry="8" fill="#FFB6C1" opacity="0.6"/>
+
+                        <!-- 眼睛 -->
+                        <g id="eyes">
+                            <circle id="eye-left" cx="70" cy="95" r="10" fill="#333"/>
+                            <circle id="eye-right" cx="130" cy="95" r="10" fill="#333"/>
+                            <circle cx="73" cy="92" r="3" fill="white"/>
+                            <circle cx="133" cy="92" r="3" fill="white"/>
+                        </g>
+
+                        <!-- 眉毛 -->
+                        <g id="eyebrows">
+                            <ellipse cx="70" cy="78" rx="8" ry="3" fill="#8B7355"/>
+                            <ellipse cx="130" cy="78" rx="8" ry="3" fill="#8B7355"/>
+                        </g>
+
+                        <!-- 嘴巴 -->
+                        <path id="mouth" d="M 85 125 Q 100 140 115 125" stroke="#FF6B6B" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+                        <!-- 发型 -->
+                        <g id="hair">
+                            <path d="M 30 105 Q 30 40 100 30 Q 170 40 170 105 Q 170 80 150 60 Q 100 50 50 60 Q 30 80 30 105" fill="#4A3728"/>
+                            <path d="M 30 105 Q 25 130 35 140 L 40 110 Z" fill="#4A3728"/>
+                            <path d="M 170 105 Q 175 130 165 140 L 160 110 Z" fill="#4A3728"/>
+                        </g>
+
+                        <!-- 配饰 -->
+                        <g id="accessory"></g>
+                    </svg>
+                </div>
+                <div class="action-buttons" style="width: 100%;">
+                    <button class="btn btn-primary" onclick="randomizeAvatar()">🎲 随机生成</button>
+                    <button class="btn btn-success" onclick="downloadAvatar()">💾 保存头像</button>
+                </div>
+            </div>
+
+            <div class="controls-area">
+                <div class="control-group">
+                    <label>肤色</label>
+                    <div class="color-options" id="skin-colors">
+                        <button class="color-btn active" style="background: #FFDAB9" data-color="#FFDAB9" onclick="changeSkinColor(this)"></button>
+                        <button class="color-btn" style="background: #F5DEB3" data-color="#F5DEB3" onclick="changeSkinColor(this)"></button>
+                        <button class="color-btn" style="background: #F4A460" data-color="#F4A460" onclick="changeSkinColor(this)"></button>
+                        <button class="color-btn" style="background: #D2691E" data-color="#D2691E" onclick="changeSkinColor(this)"></button>
+                        <button class="color-btn" style="background: #8B4513" data-color="#8B4513" onclick="changeSkinColor(this)"></button>
+                        <button class="color-btn" style="background: #FFDFC4" data-color="#FFDFC4" onclick="changeSkinColor(this)"></button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>脸型</label>
+                    <div class="options" id="face-shapes">
+                        <button class="option-btn active" onclick="changeFaceShape('round')">圆形</button>
+                        <button class="option-btn" onclick="changeFaceShape('oval')">椭圆</button>
+                        <button class="option-btn" onclick="changeFaceShape('square')">方形</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>发型</label>
+                    <div class="options" id="hairstyles">
+                        <button class="option-btn active" onclick="changeHairstyle(0)">短发</button>
+                        <button class="option-btn" onclick="changeHairstyle(1)">长发</button>
+                        <button class="option-btn" onclick="changeHairstyle(2)">丸子头</button>
+                        <button class="option-btn" onclick="changeHairstyle(3)">双马尾</button>
+                        <button class="option-btn" onclick="changeHairstyle(4)">蘑菇头</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>发色</label>
+                    <div class="color-options" id="hair-colors">
+                        <button class="color-btn active" style="background: #4A3728" data-color="#4A3728" onclick="changeHairColor(this)"></button>
+                        <button class="color-btn" style="background: #F4C430" data-color="#F4C430" onclick="changeHairColor(this)"></button>
+                        <button class="color-btn" style="background: #E6C200" data-color="#E6C200" onclick="changeHairColor(this)"></button>
+                        <button class="color-btn" style="background: #C0C0C0" data-color="#C0C0C0" onclick="changeHairColor(this)"></button>
+                        <button class="color-btn" style="background: #FF69B4" data-color="#FF69B4" onclick="changeHairColor(this)"></button>
+                        <button class="color-btn" style="background: #8B4513" data-color="#8B4513" onclick="changeHairColor(this)"></button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>眼睛</label>
+                    <div class="options" id="eye-styles">
+                        <button class="option-btn active" onclick="changeEyes('round')">圆眼</button>
+                        <button class="option-btn" onclick="changeEyes('oval')'>椭圆</button>
+                        <button class="option-btn" onclick="changeEyes('happy')">笑眼</button>
+                        <button class="option-btn" onclick="changeEyes('wink')">眨眼</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>嘴巴</label>
+                    <div class="options" id="mouth-styles">
+                        <button class="option-btn active" onclick="changeMouth('smile')">微笑</button>
+                        <button class="option-btn" onclick="changeMouth('happy')">开心</button>
+                        <button class="option-btn" onclick="changeMouth('surprise')">惊讶</button>
+                        <button class="option-btn" onclick="changeMouth('cat')">猫嘴</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>配饰</label>
+                    <div class="options" id="accessories">
+                        <button class="option-btn active" onclick="changeAccessory('none')">无</button>
+                        <button class="option-btn" onclick="changeAccessory('glasses')">眼镜</button>
+                        <button class="option-btn" onclick="changeAccessory('bow')">蝴蝶结</button>
+                        <button class="option-btn" onclick="changeAccessory('hat')">帽子</button>
+                        <button class="option-btn" onclick="changeAccessory('flowers')">花朵</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>背景</label>
+                    <div class="color-options" id="bg-colors">
+                        <button class="color-btn active" style="background: #FFE4E1" data-color="#FFE4E1" onclick="changeBgColor(this)"></button>
+                        <button class="color-btn" style="background: #E0FFFF" data-color="#E0FFFF" onclick="changeBgColor(this)"></button>
+                        <button class="color-btn" style="background: #F0E68C" data-color="#F0E68C" onclick="changeBgColor(this)"></button>
+                        <button class="color-btn" style="background: #DDA0DD" data-color="#DDA0DD" onclick="changeBgColor(this)"></button>
+                        <button class="color-btn" style="background: #98FB98" data-color="#98FB98" onclick="changeBgColor(this)"></button>
+                        <button class="color-btn" style="background: #FFB6C1" data-color="#FFB6C1" onclick="changeBgColor(this)"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hairstyles = [
+            // 短发
+            '<path d="M 30 105 Q 30 40 100 30 Q 170 40 170 105 Q 170 80 150 60 Q 100 50 50 60 Q 30 80 30 105" fill="{hairColor}"/><path d="M 30 105 Q 25 130 35 140 L 40 110 Z" fill="{hairColor}"/><path d="M 170 105 Q 175 130 165 140 L 160 110 Z" fill="{hairColor}"/>',
+            // 长发
+            '<path d="M 25 110 Q 25 30 100 25 Q 175 30 175 110 Q 180 150 170 180 L 160 120 Q 100 115 40 120 L 30 180 Q 20 150 25 110" fill="{hairColor}"/><path d="M 25 110 Q 20 140 30 160 L 35 115 Z" fill="{hairColor}"/><path d="M 175 110 Q 180 140 170 160 L 165 115 Z" fill="{hairColor}"/>',
+            // 丸子头
+            '<circle cx="100" cy="35" r="25" fill="{hairColor}"/><path d="M 30 105 Q 30 50 100 50 Q 170 50 170 105 Q 170 80 150 60 Q 100 55 50 60 Q 30 80 30 105" fill="{hairColor}"/>',
+            // 双马尾
+            '<path d="M 30 105 Q 30 40 100 30 Q 170 40 170 105" fill="{hairColor}"/><path d="M 30 105 Q 10 130 15 160 Q 25 170 35 140 L 40 110 Z" fill="{hairColor}"/><path d="M 170 105 Q 190 130 185 160 Q 175 170 165 140 L 160 110 Z" fill="{hairColor}"/>',
+            // 蘑菇头
+            '<path d="M 20 100 Q 20 30 100 30 Q 180 30 180 100 Q 180 70 160 60 Q 100 55 40 60 Q 20 70 20 100 L 20 120 L 180 120 L 180 100" fill="{hairColor}"/>'
+        ];
+
+        const accessories = {
+            none: '',
+            glasses: '<circle cx="70" cy="95" r="18" stroke="#333" stroke-width="3" fill="none"/><circle cx="130" cy="95" r="18" stroke="#333" stroke-width="3" fill="none"/><line x1="88" y1="95" x2="112" y2="95" stroke="#333" stroke-width="3"/>',
+            bow: '<path d="M 100 35 L 80 20 L 80 50 Z" fill="#FF69B4"/><path d="M 100 35 L 120 20 L 120 50 Z" fill="#FF69B4"/><circle cx="100" cy="35" r="5" fill="#FF1493"/>',
+            hat: '<ellipse cx="100" cy="40" rx="50" ry="10" fill="#FF6B6B"/><path d="M 70 40 L 75 10 Q 100 5 125 10 L 130 40" fill="#FF6B6B"/><rect x="70" y="35" width="60" height="8" fill="#FF4757"/>',
+            flowers: '<circle cx="70" cy="55" r="8" fill="#FFB6C1"/><circle cx="70" cy="55" r="4" fill="#FFEB3B"/><circle cx="130" cy="55" r="8" fill="#FFB6C1"/><circle cx="130" cy="55" r="4" fill="#FFEB3B"/>'
+        };
+
+        let currentHairColor = '#4A3728';
+
+        function changeSkinColor(btn) {
+            document.querySelectorAll('#skin-colors .color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('face').setAttribute('fill', btn.dataset.color);
+        }
+
+        function changeFaceShape(shape) {
+            document.querySelectorAll('#face-shapes .option-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const face = document.getElementById('face');
+            switch(shape) {
+                case 'round':
+                    face.setAttribute('rx', '70');
+                    face.setAttribute('ry', '65');
+                    break;
+                case 'oval':
+                    face.setAttribute('rx', '60');
+                    face.setAttribute('ry', '75');
+                    break;
+                case 'square':
+                    face.setAttribute('rx', '65');
+                    face.setAttribute('ry', '65');
+                    break;
+            }
+        }
+
+        function changeHairColor(btn) {
+            document.querySelectorAll('#hair-colors .color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentHairColor = btn.dataset.color;
+            updateHair();
+        }
+
+        function changeHairstyle(index) {
+            document.querySelectorAll('#hairstyles .option-btn').forEach((b, i) => {
+                b.classList.toggle('active', i === index);
+            });
+            updateHair();
+        }
+
+        function updateHair() {
+            const index = document.querySelectorAll('#hairstyles .option-btn').length -
+                         document.querySelectorAll('#hairstyles .option-btn:not(.active)').length - 1;
+            const hairGroup = document.getElementById('hair');
+            const hairSvg = hairstyles[index] || hairstyles[0];
+            hairGroup.innerHTML = hairSvg.replace(/{hairColor}/g, currentHairColor);
+        }
+
+        function changeEyes(style) {
+            document.querySelectorAll('#eye-styles .option-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const eyesGroup = document.getElementById('eyes');
+            let eyeContent = '';
+
+            switch(style) {
+                case 'round':
+                    eyeContent = '<circle cx="70" cy="95" r="10" fill="#333"/><circle cx="130" cy="95" r="10" fill="#333"/><circle cx="73" cy="92" r="3" fill="white"/><circle cx="133" cy="92" r="3" fill="white"/>';
+                    break;
+                case 'oval':
+                    eyeContent = '<ellipse cx="70" cy="95" rx="8" ry="12" fill="#333"/><ellipse cx="130" cy="95" rx="8" ry="12" fill="#333"/><circle cx="72" cy="92" r="3" fill="white"/><circle cx="132" cy="92" r="3" fill="white"/>';
+                    break;
+                case 'happy':
+                    eyeContent = '<path d="M 60 95 Q 70 85 80 95" stroke="#333" stroke-width="3" fill="none"/><path d="M 120 95 Q 130 85 140 95" stroke="#333" stroke-width="3" fill="none"/>';
+                    break;
+                case 'wink':
+                    eyeContent = '<circle cx="70" cy="95" r="10" fill="#333"/><circle cx="73" cy="92" r="3" fill="white"/><path d="M 120 95 Q 130 90 140 95" stroke="#333" stroke-width="3" fill="none"/>';
+                    break;
+            }
+            eyesGroup.innerHTML = eyeContent;
+        }
+
+        function changeMouth(style) {
+            document.querySelectorAll('#mouth-styles .option-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const mouth = document.getElementById('mouth');
+            switch(style) {
+                case 'smile':
+                    mouth.setAttribute('d', 'M 85 125 Q 100 140 115 125');
+                    mouth.setAttribute('fill', 'none');
+                    break;
+                case 'happy':
+                    mouth.setAttribute('d', 'M 85 125 Q 100 150 115 125 Z');
+                    mouth.setAttribute('fill', '#FF6B6B');
+                    break;
+                case 'surprise':
+                    mouth.setAttribute('d', 'M 92 130 Q 100 145 108 130 Q 100 115 92 130');
+                    mouth.setAttribute('fill', '#FF6B6B');
+                    break;
+                case 'cat':
+                    mouth.setAttribute('d', 'M 85 130 Q 100 125 115 130');
+                    mouth.setAttribute('fill', 'none');
+                    break;
+            }
+        }
+
+        function changeAccessory(style) {
+            document.querySelectorAll('#accessories .option-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('accessory').innerHTML = accessories[style];
+        }
+
+        function changeBgColor(btn) {
+            document.querySelectorAll('#bg-colors .color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelector('#avatar-svg circle').setAttribute('fill', btn.dataset.color);
+        }
+
+        function randomizeAvatar() {
+            const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+            // 随机肤色
+            const skinBtns = document.querySelectorAll('#skin-colors .color-btn');
+            random(Array.from(skinBtns)).click();
+
+            // 随机脸型
+            const faceShapes = ['round', 'oval', 'square'];
+            const faceIndex = Math.floor(Math.random() * faceShapes.length);
+            document.querySelectorAll('#face-shapes .option-btn')[faceIndex].click();
+
+            // 随机发型
+            const hairIndex = Math.floor(Math.random() * hairstyles.length);
+            document.querySelectorAll('#hairstyles .option-btn')[hairIndex].click();
+
+            // 随机发色
+            const hairColorBtns = document.querySelectorAll('#hair-colors .color-btn');
+            random(Array.from(hairColorBtns)).click();
+
+            // 随机眼睛
+            const eyeStyles = ['round', 'oval', 'happy', 'wink'];
+            const eyeIndex = Math.floor(Math.random() * eyeStyles.length);
+            document.querySelectorAll('#eye-styles .option-btn')[eyeIndex].click();
+
+            // 随机嘴巴
+            const mouthStyles = ['smile', 'happy', 'surprise', 'cat'];
+            const mouthIndex = Math.floor(Math.random() * mouthStyles.length);
+            document.querySelectorAll('#mouth-styles .option-btn')[mouthIndex].click();
+
+            // 随机配饰
+            const accStyles = ['none', 'glasses', 'bow', 'hat', 'flowers'];
+            const accIndex = Math.floor(Math.random() * accStyles.length);
+            document.querySelectorAll('#accessories .option-btn')[accIndex].click();
+
+            // 随机背景
+            const bgBtns = document.querySelectorAll('#bg-colors .color-btn');
+            random(Array.from(bgBtns)).click();
+        }
+
+        function downloadAvatar() {
+            const svg = document.getElementById('avatar-svg');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            canvas.width = 500;
+            canvas.height = 500;
+
+            img.onload = function() {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, 500, 500);
+
+                const link = document.createElement('a');
+                link.download = 'cute-avatar.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            };
+
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        }
+    </script>
+</body>
+</html>
